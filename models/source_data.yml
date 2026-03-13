@@ -1,0 +1,7 @@
+version: 2
+sources:
+  - name: taxi_data
+    database: global-grammar-449122-b6
+    schema: taxi_data
+    tables:
+      - name: taxi_trips
