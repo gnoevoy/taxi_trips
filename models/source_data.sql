@@ -1,3 +1,5 @@
+-- Source table for conducting further analysis
+
 with cte as (
     select 
         row_number() over() as ride_id,
@@ -6,6 +8,7 @@ with cte as (
         trip_end_timestamp,
 
         -- Extracted date and time features
+        extract(year from trip_start_timestamp) AS year,
         extract(month from trip_start_timestamp) AS month_num,
         format_timestamp('%B', trip_start_timestamp) AS month_name,
         format_timestamp('%A', trip_start_timestamp) AS day_name,
@@ -32,18 +35,22 @@ with cte as (
     where safe_divide(trip_seconds, 60) > 0
         and trip_miles > 0 and trip_miles < 200
         and fare > 0 and round(safe_divide(fare, trip_miles),2) < 50 
+
+    limit 2000000
 )
 
 select *,
-    -- different buckets categories for analysis
+    -- day type flag
     case when day_of_week_num in (6, 7) then 0 else 1 end as is_workday,
 
+    -- time of day buckets
     case when hour >= 5 and hour < 12 then 'Morning'
         when hour >= 12 and hour < 17 then 'Afternoon'
         when hour >= 17 and hour < 21 then 'Evening'
         else 'Night'
     end as time_of_day,
 
+    -- trip duration buckets
     case when trip_minutes < 5 then '0-5 min'
         when trip_minutes < 10 then '5-10 min'
         when trip_minutes < 20 then '10-20 min'
@@ -52,6 +59,7 @@ select *,
         else '60+ min'
     end as duration_bucket,
 
+    -- trip distance buckets
     case when trip_miles < 1 then '0-1 mile'
         when trip_miles < 3 then '1-3 mile'
         when trip_miles < 5 then '3-5 mile'
