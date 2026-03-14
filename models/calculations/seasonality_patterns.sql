@@ -21,7 +21,6 @@ result as (
     order by hour, day_of_week_num
 )
 
-
 -- Extra task: Identify for each day the best hour by number of trips 
 select 
     day_of_week_num,
